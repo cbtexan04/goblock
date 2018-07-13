@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -16,6 +17,8 @@ type Block struct {
 }
 
 type Blockchain []Block
+
+var bcMutex = &sync.Mutex{}
 
 func (b *Block) CalculateHash() string {
 	// Calculate a unique hash based on the contents of the block

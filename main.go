@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -9,8 +10,44 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func Write(w http.ResponseWriter, code int, response interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	b, err := json.MarshalIndent(response, "", "    ")
+	if err != nil {
+		log.Println(err)
+		WriteError(w, 500, "unable to marshal json response")
+		return
+	}
+
+	w.WriteHeader(code)
+	w.Write(b)
+}
+
+func WriteError(w http.ResponseWriter, code int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	data := struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+	}{
+		"failed", message,
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, "something has gone horribly wrong", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(code)
+	w.Write(b)
+}
+
 func displayChain(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	// While locking the blockchain isn't stricly necessary at this point,
+	// it's probably a good idea
+	bcMutex.Lock()
+	Write(Blockchain)
+	bcMutex.Unlock()
 }
 
 func writeBlock(w http.ResponseWriter, r *http.Request) {
