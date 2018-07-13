@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"time"
 )
 
 type Block struct {
@@ -24,4 +25,18 @@ func (b *Block) CalculateHash() string {
 	h.Write([]byte(str))
 
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// Generates a new block
+func (b *Block) Generate(BPM int) (Block, error) {
+	newBlock := Block{
+		Index:     b.Index + 1,
+		Timestamp: time.Now().String(),
+		BPM:       BPM,
+		PrevHash:  b.Hash,
+	}
+
+	newBlock.Hash = newBlock.CalculateHash()
+
+	return newBlock, nil
 }
