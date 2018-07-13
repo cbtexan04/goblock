@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func Write(w http.ResponseWriter, code int, response interface{}) {
@@ -108,4 +109,19 @@ func run() error {
 	}
 
 	return nil
+}
+
+func main() {
+	// Load our port through the .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create our genesis block
+	t := time.Now()
+	genesis := &Block{0, t.String(), "", "", 0}
+	Blockchain = append(Blockchain, genesis)
+
+	log.Fatal(run())
 }
