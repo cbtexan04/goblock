@@ -16,9 +16,10 @@ type Block struct {
 	Index     int
 }
 
-type Blockchain []Block
-
-var bcMutex = &sync.Mutex{}
+var (
+	Blockchain []*Block
+	bcMutex    = &sync.Mutex{}
+)
 
 func (b *Block) CalculateHash() string {
 	// Calculate a unique hash based on the contents of the block
@@ -31,7 +32,7 @@ func (b *Block) CalculateHash() string {
 }
 
 // Generates a new block
-func (b *Block) Generate(BPM int) (Block, error) {
+func (b *Block) Generate(BPM int) (*Block, error) {
 	newBlock := Block{
 		Index:     b.Index + 1,
 		Timestamp: time.Now().String(),
@@ -41,7 +42,7 @@ func (b *Block) Generate(BPM int) (Block, error) {
 
 	newBlock.Hash = newBlock.CalculateHash()
 
-	return newBlock, nil
+	return &newBlock, nil
 }
 
 func (b *Block) IsValidNextBlock(nextBlock *Block) bool {

@@ -46,12 +46,45 @@ func displayChain(w http.ResponseWriter, r *http.Request) {
 	// While locking the blockchain isn't stricly necessary at this point,
 	// it's probably a good idea
 	bcMutex.Lock()
-	Write(Blockchain)
+	Write(w, 200, Blockchain)
 	bcMutex.Unlock()
 }
 
+type Message struct {
+	BPM int `json:"bpm"`
+}
+
 func writeBlock(w http.ResponseWriter, r *http.Request) {
-	// TODO
+	var m Message
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&m); err != nil {
+		WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer r.Body.Close()
+
+	// This is OK, since we've established our genesis block already
+	lastBlock := Blockchain[len(Blockchain)-1]
+
+	newBlock, err := lastBlock.Generate(m.BPM)
+	if err != nil {
+		WriteError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if lastBlock.IsValidNextBlock(newBlock) {
+		newBlockchain := append(Blockchain, newBlock)
+
+		// We could run into an issue where two nodes have added
+		// (valid) blocks to their chains and we get them both. In this
+		// case, we need to make sure to pick the longest chain.
+		if len(newBlockchain) > len(Blockchain) {
+			Blockchain = newBlockchain
+		}
+	}
+
+	Write(w, http.StatusCreated, newBlock)
 }
 
 func run() error {
