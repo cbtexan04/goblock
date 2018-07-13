@@ -103,7 +103,7 @@ func run() error {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	log.Printf("Listening on ", port)
+	log.Printf("Listening on %s", port)
 	if err := s.ListenAndServe(); err != nil {
 		return err
 	}
