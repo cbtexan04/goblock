@@ -119,8 +119,13 @@ func main() {
 	}
 
 	// Create our genesis block
-	t := time.Now()
-	genesis := &Block{0, t.String(), "", "", 0}
+	genesis := &Block{
+		Index:     0,
+		Timestamp: time.Now().String(),
+		BPM:       0,
+		PrevHash:  "",
+	}
+	genesis.Hash = genesis.CalculateHash()
 	Blockchain = append(Blockchain, genesis)
 
 	log.Fatal(run())
