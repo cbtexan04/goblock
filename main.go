@@ -40,3 +40,22 @@ func (b *Block) Generate(BPM int) (Block, error) {
 
 	return newBlock, nil
 }
+
+func (b *Block) IsValidNextBlock(nextBlock *Block) bool {
+	// Make sure the block is incremented correctly
+	if b.Index+1 != nextBlock.Index {
+		return false
+	}
+
+	// Make sure the previous hash of the next block matches our current block
+	if b.Hash != nextBlock.PrevHash {
+		return false
+	}
+
+	// Make sure the hash of the next block is valid
+	if nextBlock.CalculateHash() != nextBlock.Hash {
+		return false
+	}
+
+	return true
+}
